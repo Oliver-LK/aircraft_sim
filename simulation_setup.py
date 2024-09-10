@@ -16,7 +16,7 @@ import ussa1976
 
 # Simulation time settings
 TRIM_SIM_TIME           = 600 # (s)
-PERTURBATION_SIM_TIME   = 500 # (s)
+PERTURBATION_SIM_TIME   = 600 # (s)
 
 # =========================
 #  Atmospheric data
@@ -108,8 +108,6 @@ def init_x0_for_perturbation():
                     p20_n_m,
                     p30_n_m,
                 ])
-    
-    print(x0)
     
     return x0
 

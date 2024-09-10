@@ -33,7 +33,7 @@ from aircraft_models.models import VehicleData, Aircraft
 
 # Settings
 PRINT_READ_OUTS = False
-DO_PERTURBATION = False
+DO_PERTURBATION = True
 
 PERTURBATION_TIME = 100
 
@@ -73,9 +73,12 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
     p3_n_m      = x[11]
 
     if DO_PERTURBATION == True and t == PERTURBATION_TIME:
-        u_b_mps += -10
+        u_b_mps += 10
         v_b_mps += 50
         w_b_mps += 20
+        p_b_rps += np.deg2rad(15)
+        q_b_rps += np.deg2rad(-12)
+        r_b_rps += np.deg2rad(8)
         print("Doing perturbation")
 
 
@@ -121,9 +124,6 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
     # Angle of attack and side slip definitions
     alpha_rad   = math.atan(w_over_u)
     beta_rad    = math.asin(v_over_vT)
-    if DO_PERTURBATION == True and t == PERTURBATION_TIME:
-        beta_rad    += np.deg2rad(10)
-        # alpha_rad   += np.rad2deg(1)
 
     s_alpha     = math.sin(alpha_rad)
     c_alpha     = math.cos(alpha_rad)
@@ -225,9 +225,9 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
                     u_b_mps,
                     v_b_mps,
                     w_b_mps,
-                    dx[3],
-                    dx[4],
-                    dx[5],
+                    p_b_rps,
+                    q_b_rps,
+                    r_b_rps,
                     dx[6],
                     dx[7],
                     dx[8],
@@ -235,6 +235,7 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
                     dx[10],
                     dx[11],
                 ])
+        print(x_new)
         return x_new
     
     if PRINT_READ_OUTS == True:
