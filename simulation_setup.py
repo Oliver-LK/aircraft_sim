@@ -15,7 +15,7 @@ import math
 import ussa1976
 
 # Simulation time settings
-TRIM_SIM_TIME           = 500 # (s)
+TRIM_SIM_TIME           = 600 # (s)
 PERTURBATION_SIM_TIME   = 500 # (s)
 
 # =========================
@@ -46,7 +46,7 @@ def init_x0_for_trim():
     """ Defines the initials conditions"""
     # Initial conditions
     # Change these as desired
-    u0_bf_mps   =   200
+    u0_bf_mps   =   180
     v0_bf_mps   =   -5
     w0_bf_mps   =   2
     p0_bf_rads  =   0 * math.pi/180
@@ -57,7 +57,7 @@ def init_x0_for_trim():
     psi0_rad    =   0 * math.pi/180
     p10_n_m     =   0
     p20_n_m     =   0
-    p30_n_m     =   -1 * 8600      # Altitude (m)
+    p30_n_m     =   -1 * 8400      # Altitude (m)
 
     # Assign initial conditions into an array
     x0 = np.array([ u0_bf_mps,

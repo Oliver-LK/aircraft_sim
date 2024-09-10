@@ -33,7 +33,8 @@ from aircraft_models.models import VehicleData, Aircraft
 
 # Settings
 PRINT_READ_OUTS = False
-DO_PERTURBATION = True
+DO_PERTURBATION = False
+
 PERTURBATION_TIME = 100
 
 
@@ -73,7 +74,7 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
 
     if DO_PERTURBATION == True and t == PERTURBATION_TIME:
         u_b_mps += -10
-        v_b_mps += 20
+        v_b_mps += 50
         w_b_mps += 20
         print("Doing perturbation")
 
@@ -89,21 +90,21 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
     t_theta     = math.tan(theta_rad)
 
     # Mass and inertial elements
-    m_kg = vehicle_data.mass_kg
-    Jxx_b_kgm2 = vehicle_data.Jxx
-    Jyy_b_kgm2 = vehicle_data.Jyy
-    Jzz_b_kgm2 = vehicle_data.Jzz
-    Jxz_b_kgm2 = vehicle_data.Jxz
+    m_kg        = vehicle_data.mass_kg
+    Jxx_b_kgm2  = vehicle_data.Jxx
+    Jyy_b_kgm2  = vehicle_data.Jyy
+    Jzz_b_kgm2  = vehicle_data.Jzz
+    Jxz_b_kgm2  = vehicle_data.Jxz
 
 
     # Altitude and Atmosphere model
     h_m = -p3_n_m
 
-    rho_interp_kgm3 = np.interp(h_m, atmos_data["alt_m"], atmos_data["rho_kgpm3"])
-    c_interp_mps = np.interp(h_m, atmos_data["alt_m"], atmos_data["c_mps"])
-    true_air_speed_mps = math.sqrt(u_b_mps ** 2 + v_b_mps ** 2 + w_b_mps ** 2)
-    dynamic_pressure_Npm2 = 0.5 * rho_interp_kgm3 * true_air_speed_mps ** 2
-    mach = true_air_speed_mps / c_interp_mps
+    rho_interp_kgm3         = np.interp(h_m, atmos_data["alt_m"], atmos_data["rho_kgpm3"])
+    c_interp_mps            = np.interp(h_m, atmos_data["alt_m"], atmos_data["c_mps"])
+    true_air_speed_mps      = math.sqrt(u_b_mps ** 2 + v_b_mps ** 2 + w_b_mps ** 2)
+    dynamic_pressure_Npm2   = 0.5 * rho_interp_kgm3 * true_air_speed_mps ** 2
+    mach                    = true_air_speed_mps / c_interp_mps
 
 
     # To avoid divide by 0
@@ -118,13 +119,16 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
         v_over_vT = v_b_mps / true_air_speed_mps
 
     # Angle of attack and side slip definitions
-    alpha_rad = math.atan(w_over_u)
-    beta_rad = math.asin(v_over_vT)
+    alpha_rad   = math.atan(w_over_u)
+    beta_rad    = math.asin(v_over_vT)
+    if DO_PERTURBATION == True and t == PERTURBATION_TIME:
+        beta_rad    += np.deg2rad(10)
+        # alpha_rad   += np.rad2deg(1)
 
-    s_alpha = math.sin(alpha_rad)
-    c_alpha = math.cos(alpha_rad)
-    s_beta = math.sin(beta_rad)
-    c_beta = math.cos(beta_rad)
+    s_alpha     = math.sin(alpha_rad)
+    c_alpha     = math.cos(alpha_rad)
+    s_beta      = math.sin(beta_rad)
+    c_beta      = math.cos(beta_rad)
 
     gz_n_mps2 = np.interp(h_m, atmos_data["alt_m"], atmos_data["g_mps2"])
 
@@ -149,7 +153,7 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
         lift_N = 0
 
     # Summation External forces
-    Fx_b_N =  - (c_alpha * c_beta * (drag_N - thrust_N) - c_alpha * s_beta * side_N - s_alpha * lift_N)
+    Fx_b_N = - (c_alpha * c_beta * (drag_N - thrust_N) - c_alpha * s_beta * side_N - s_alpha * lift_N)
     Fy_b_N = -(s_beta * (drag_N - thrust_N) + c_beta * side_N)
     Fz_b_N = -(s_alpha * c_beta * (drag_N - thrust_N) - s_alpha * s_beta * side_N + c_alpha * lift_N)
     
@@ -164,9 +168,6 @@ def flat_earth_eom(t: float, x, vehicle_data: Union[VehicleData, Aircraft] , atm
     L_damping_Nm = vehicle_data.find_roll_damping_coeff(mach, p_b_rps)  * dynamic_pressure_Npm2 * vehicle_data.a_ref_m2 * vehicle_data.mean_chord
     N_damping_Nm = vehicle_data.find_yaw_damping_coeff(mach, r_b_rps)  * dynamic_pressure_Npm2 * vehicle_data.a_ref_m2 * vehicle_data.mean_chord
 
-    # if abs(M_damping_Nm) > M_moment_Nm:
-    #     M_damping_Nm = -0.9 * M_moment_Nm
-    # External moments
     l_b_Nm = L_moment_Nm - L_damping_Nm
     m_b_Nm = M_moment_Nm + M_damping_Nm
     n_b_Nm = N_moment_Nm + N_damping_Nm

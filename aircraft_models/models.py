@@ -156,10 +156,10 @@ class Aircraft(VehicleData):
         return C_lb * beta
     
 
-    def find_roll_damping_coeff(self, Ma: float, p_b_rps: float) -> float:
+    def find_roll_damping_coeff(self, Ma: float, p_b_dps: float) -> float:
         """ Finds the total roll damping coefficient"""
         C_lq = self.find_coefficient(Ma, 'clq_data')
-        return C_lq * p_b_rps
+        return C_lq * p_b_dps
     
 
     def find_yaw_coeff(self, Ma: float, beta: float) -> float:
@@ -168,10 +168,10 @@ class Aircraft(VehicleData):
         return C_nb * beta
     
 
-    def find_yaw_damping_coeff(self, Ma: float, r_b_rps: float) -> float:
+    def find_yaw_damping_coeff(self, Ma: float, r_b_dps: float) -> float:
         """ Finds the total roll damping coefficient"""
         C_nq = self.find_coefficient(Ma, 'cnq_data')
-        return C_nq * r_b_rps
+        return C_nq * r_b_dps
 
         
 

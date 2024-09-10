@@ -13,6 +13,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import time
 
 # Module imports
 from intergration import foward_euler
@@ -20,6 +21,9 @@ from simulation_setup import init_atmos_data, init_x0_for_trim, give_trim_sim_ru
 from aircraft_simulator import flat_earth_eom
 from aircraft_models.models import *
 from plots import plot_aerodynamic, plot_aircraft_axis, plot_aircraft_motion
+
+# Record the start time
+start_time = time.time()
 
 # Settings
 DO_PLOT = True
@@ -82,7 +86,6 @@ for i, element in enumerate(t_s):
     rho_kgpm3_c[i, 0] = np.interp(altitude_m[i, 0], atmos_data["alt_m"], atmos_data["rho_kgpm3"])
     mach[i, 0] = true_air_speed_mps[i, 0] / cs_mps[i, 0]
 
-    # print(true_air_speed_mps[i, 0])
 
     # angle of attack
     if x[0, i] == 0 and x[2, i] == 0:
@@ -102,7 +105,12 @@ for i, element in enumerate(t_s):
 
     beta_rad[i, 0] = math.asin(v_over_VT)
 
-# print(mach)
+
+# Record the end time
+end_time = time.time()
+execution_time = end_time - start_time
+
+print(f"Execution time: {execution_time:.5f} seconds")
 
 if DO_PLOT == True:
     plot_aircraft_axis(t_s, x, vehicle_data)
